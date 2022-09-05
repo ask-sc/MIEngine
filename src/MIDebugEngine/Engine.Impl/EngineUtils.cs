@@ -170,6 +170,68 @@ namespace Microsoft.MIDebugEngine
                 new Entry( "q[0-9]+", true, "Vector"),
             };
 
+            private static readonly string s_riscvHPM = "Unprivileged Counter/Timers";
+            private static readonly string s_riscvDebug = "Debug";
+            private static readonly string s_riscvSupervisor = "Supervisor";
+            private static readonly string s_riscvHypervisor = "Hypervisor";
+            private static readonly string s_riscvVSupervisor = "Virtual Supervisor";
+            private static readonly string s_riscvMHPM = "Machine Counter/Timers";
+            private static readonly string s_riscvPMP = "Machine Memory Protection";
+            private static readonly string s_riscvMachine = "Machine";
+            private static readonly Entry[] s_riscvRegisters = new Entry[]
+            {
+                // CSR designation based on https://github.com/riscv/riscv-isa-manual/releases/download/Priv-v1.12/riscv-privileged-20211203.pdf
+                // Generic rules must be the last, to ensure that they don't
+                // override more specific rules.
+                // Core registers.
+                new Entry( "zero", false, "CPU"),
+                new Entry( "ra", false, "CPU"),
+                new Entry( "sp", false, "CPU"),
+                new Entry( "gp", false, "CPU"),
+                new Entry( "tp", false, "CPU"),
+                new Entry( "fp", false, "CPU"),
+                new Entry( "pc", false, "CPU"),
+                new Entry( "^[ast][0-9]+$", true, "CPU"),
+                // FPU registers.
+                new Entry( "fflags", false, "FPU"),
+                new Entry( "frm", false, "FPU"),
+                new Entry( "fcsr", false, "FPU"),
+                new Entry( "^f[ast][0-9]+$", true, "FPU"),
+                // Unprivileged Counter/Timers registers.
+                new Entry( "cycle", false, s_riscvHPM),
+                new Entry( "time", false, s_riscvHPM),
+                new Entry( "instret", false, s_riscvHPM),
+                new Entry( "cycleh", false, s_riscvHPM),
+                new Entry( "timeh", false, s_riscvHPM),
+                new Entry( "instreth", false, s_riscvHPM),
+                new Entry( "^hpmcounter[0-9]+h?$", true, s_riscvHPM),
+                // Machine Counter/Timers registers.
+                new Entry( "mcycle", false, s_riscvMHPM),
+                new Entry( "minstret", false, s_riscvMHPM),
+                new Entry( "mcycleh", false, s_riscvMHPM),
+                new Entry( "minstreth", false, s_riscvMHPM),
+                new Entry( "^mhpmcounter[0-9]+h?$", true, s_riscvMHPM),
+                new Entry( "mcountinhibit", false, s_riscvMHPM),
+                new Entry( "^mhpmevent[0-9]+$", true, s_riscvMHPM),
+                // Debug registers.
+                new Entry( "tselect", false, s_riscvDebug),
+                new Entry( "tdata1", false, s_riscvDebug),
+                new Entry( "tdata2", false, s_riscvDebug),
+                new Entry( "tdata3", false, s_riscvDebug),
+                new Entry( "mcontext", false, s_riscvDebug),
+                new Entry( "^d.+", true, s_riscvDebug),
+                // Machine Memory Protection registers.
+                new Entry( "^pmp.+$", true, s_riscvPMP),
+                // Supervisor-level registers.
+                new Entry( "^s.+", true, s_riscvSupervisor),
+                // Hypervisor-level registers.
+                new Entry( "^h.+", true, s_riscvHypervisor),
+                // Virtual Supervisor
+                new Entry( "^vs.+", true, s_riscvVSupervisor),
+                // Machine registers.
+                new Entry( "^m.+", true, s_riscvMachine),
+            };
+
             private static readonly Entry[] s_X86Registers = new Entry[]
             {
                 new Entry( "rax", false, "CPU" ),
@@ -226,6 +288,10 @@ namespace Microsoft.MIDebugEngine
                 if (registerNames.Contains("lr"))
                 {
                     map._map = s_arm32Registers;
+                }
+                else if (registerNames.Contains("mvendorid"))
+                {
+                    map._map = s_riscvRegisters;
                 }
                 else if (registerNames.Contains("eax")) // x86 register set
                 {
