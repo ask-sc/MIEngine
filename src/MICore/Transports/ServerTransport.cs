@@ -40,6 +40,11 @@ namespace MICore
             _messagePrefix = Path.GetFileNameWithoutExtension(localOptions.DebugServer);
 
             InitProcess(proc, out reader, out writer);
+
+            if (!_started && String.IsNullOrWhiteSpace(_startPattern)) {
+                _started = true;
+                StartedEvent.Set();
+            }
         }
 
         protected override string FilterLine(string line)
